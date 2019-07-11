@@ -7,6 +7,11 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const superagent = require('superagent');
+const pg = require('pg');
+
+const client = new pg.Client(process.env.DATABASE_URL);
+client.connect();
+// client.on('error', error => console.error(error));
 
 // Global Variables
 const PORT = process.env.PORT;
@@ -36,11 +41,11 @@ app.use('*', (request, response) => {
 });
 
 // Location Constructor
-function Location(search_query, formatted_query, latitude, longitude) {
-  this.search_query = search_query;
-  this.formatted_query = formatted_query;
-  this.latitude = latitude;
-  this.longitude = longitude;
+function Location(locationName, result) {
+  this.search_query = locationName;
+  this.formatted_query = result.body.results[0].formatted_address;
+  this.latitude = result.body.results[0].geometry.location.lat;
+  this.longitude = result.body.results[0].geometry.location.lng;
 }
 
 // Location - get Geo JSON, create object via constructor, return object
@@ -48,23 +53,51 @@ function Location(search_query, formatted_query, latitude, longitude) {
 
 function returnLocation(request, response) {
   const locationName = request.query.data;
+  const table = 'locations';
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${locationName}&key=${process.env.GEOCODE_API_KEY}`
-  superagent
-    .get(url)
-    .then(result => {
-      const lat = result.body.results[0].geometry.location.lat;
-      const lng = result.body.results[0].geometry.location.lng;
-      const formatted_query = result.body.results[0].formatted_address;
-      const search_query = locationName;
-    
-      response.status(200).send(new Location(search_query, formatted_query, lat, lng));
-    })
-    .catch(err => {
-      console.error(err);
-      response.status(500).send('Sorry, something went wrong.')
-    });
 
-};
+  client.query(`SELECT * FROM locations WHERE search_query=$1`, [locationName])
+    .then (sqlResult => {
+      if (sqlResult.rowCount === 0) {
+        superagent.get(url)
+          .then(result => {
+            let location = new Location (locationName, result);
+            client.query(`INSERT INTO locations (
+              search_query,
+              formatted_query,
+              latitude,
+              longitude
+              ) VALUES ($1, $2, $3, $4)`, [location.search_query, location.formatted_query, location.latitude, location.longitude]
+            )
+            console.log('sending from googles');
+            response.send(location);
+
+          }).catch (err => {
+            // console.error(err);
+            response.status(500).send('Status 500: So sorry I broke');
+          })
+      } else {
+        console.log ('sending from db');
+        response.send(sqlResult.rows[0]);
+      }
+    });
+}
+// Weather - get Darksky JSON, create object via constructor, return object
+// -------------------------------------------------------------------------
+function dbVerify (url, sqlString, table, locationName) {
+  client.query(`SELECT * FROM ${table} WHERE search_query=S1`, [locationName])
+    .then(sqlResult => {
+      if (sqlResult.rowCount === 0) {
+        superagent.get(url)
+          .then(return false)
+          } else {response.send(sqlResult.rows[0])})
+      }
+    })
+}
+
+// Weather - get Darksky JSON, create object via constructor, return object
+// -------------------------------------------------------------------------
+
 
 //Weather Constructor
 function Weather(forecast, time) {
@@ -81,7 +114,6 @@ function returnWeather (request, response) {
   superagent
     .get(url)
     .then(result => {
-      console.log(result.body.daily.data);
       const weather = result.body.daily.data.map(obj => {
         let forecast = obj.summary;
         let time = new Date(obj.time * 1000).toDateString();
@@ -91,7 +123,7 @@ function returnWeather (request, response) {
 
     })
     .catch(err => {
-      console.error(err);
+      // console.error(err);
       response.status(500).send('Sorry, something went wrong.');
     })
 }
@@ -113,7 +145,6 @@ function returnEvents (request, response) {
   superagent
     .get(url)
     .then(result => {
-      console.log(result.body.events[0]);
       const events = result.body.events.map(obj => {
         const link = obj.url;
         const name = obj.name.text;
@@ -125,7 +156,7 @@ function returnEvents (request, response) {
 
     })
     .catch(err => {
-      console.error(err);
+      // console.error(err);
       response.status(500).send('Sorry, something went wrong.');
     })
 }
