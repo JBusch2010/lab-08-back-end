@@ -1,6 +1,6 @@
 # lab-07-back-end
 
-**Authors**: Chris Coulon, Matt Stuhring
+**Authors**: Chris Coulon & Joachen Busch
 
 ## Overview
 Provide the user with weather data for the location they enter.
@@ -25,53 +25,35 @@ Provide the user with weather data for the location they enter.
 - 07-10-2019 - Implemented superagent, requested geocoding API, reformatted returnLocation function
 - 07-10-2019 - Reformatted returnWeather function to use DarkSky API and display on our frontend
 - 07-10-2019 - Included events api from EventBrite
+- 07-11-2019 - Completed sql database creation with three new tables.
+
 
 ## Credits & Collaborations
 Chris Coulon, Matt Stuhring, Padma Ganapathi, Trevor Dobson & Marisha Hoza
 Brandon Hurrington & Joachen Busche
+Jack Kinne
 
 ## Features
 
-### 1 Data Formatting
-Number and name of feature: #1 Data Formatting
-
-Estimate of time needed to complete: 00:40
-
-Start time: 09:46AM
-
-Finish time: 10:00AM
-
-Actual time needed to complete: 00:14
-
-### 2 Locations
-Number and name of feature: #2 Locations
-
-Estimate of time needed to complete: 00:40
-
-Start time: 10:01AM
-
-Finish time: 10:51AM
-
-Actual time needed to complete: 00:50
-
-### 3 Weather
-Number and name of feature: #3 Weather
-
-Estimate of time needed to complete: 00:51
-
-Start time: 10:54AM
-
-Finish time: 11:40AM
-
-Actual time needed to complete: 48min
-
-### 4 EventBrite
-Number and name of feature: #4 EventBrite
+### 1 Database Setup / Table Creation
+Number and name of feature: #1 Database Setup & Table Creation
 
 Estimate of time needed to complete: 00:45
 
-Start time: 11:42AM
+Start time: 09:32AM
 
-Finish time: 12:22PM
+Finish time: 10:52AM
 
-Actual time needed to complete: 40min
+Actual time needed to complete: 01:30
+
+### 2 Server Code WorkFlow
+Number and name of feature: #2 Server Code WorkFlow
+
+Estimate of time needed to complete: 00:45
+
+Start time: 10:53AM
+
+Finish time: 10:52AM
+
+Actual time needed to complete: 01:30
+
